@@ -1,9 +1,9 @@
-FROM python:3.8
+FROM arm64v8/python:3.8
 
 COPY ./app /app
 WORKDIR /app
 
-RUN pip install -r uvicorn main:app --reload
+RUN pip install -r requirements.txt
 
 EXPOSE 80
 
