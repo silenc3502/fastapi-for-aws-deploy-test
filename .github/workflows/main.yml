@@ -11,7 +11,7 @@ env:
   NAME: fastapi-server
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
 
     steps:
@@ -48,3 +48,37 @@ jobs:
           push: true
           tags: ghcr.io/silenc3502/fastapi-server:latest
           platforms: linux/arm64
+          
+  deploy:
+    needs: build
+    name: Deploy
+    runs-on: [ self-hosted, deploy-fastapi ]
+    steps:
+      - name: Login to ghcr
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GHCR_TOKEN }}
+          
+      - name: Deploy to prod
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.HOST_PROD }}
+          username: ec2-user
+          key: ${{ secrets.PRIVATE_KEY }}
+          script_stop: true
+          script: |
+            pwd
+            ls -al
+            cd automation_front
+            pwd
+            
+            echo ${{ secrets.GHCR_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            
+            docker pull ghcr.io/silenc3502/fastapi-server:latest
+
+            docker image prune -f
+            docker logout
+            
+            docker-compose up -d
