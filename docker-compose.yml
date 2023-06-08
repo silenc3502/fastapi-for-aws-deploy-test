@@ -4,7 +4,7 @@ services:
     image: ghcr.io/silenc3502/fastapi-for-aws-deploy-test:latest
     container_name: docker-fastapi-deploy-server
     ports:
-      - 80:80
+      - 8000:8000
     networks:
       - app
 
